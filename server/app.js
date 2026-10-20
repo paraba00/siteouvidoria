@@ -137,8 +137,18 @@ export function createApp({ dataDir, secureCookies = process.env.COOKIE_SECURE =
       const admin = db.prepare('SELECT * FROM admins WHERE email = ?').get(normalizeEmail(body.email));
       if (!await verifyPassword(body.password, admin?.password_hash)) throw new RequestError(401, 'E-mail ou senha incorretos.');
       const token = randomBytes(32).toString('hex');
-      db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(Date.now());
-      db.prepare('INSERT INTO sessions (token_hash, admin_id, expires_at) VALUES (?, ?, ?)').run(hashToken(token), admin.id, Date.now() + sessionTTL);
+      db.exec('BEGIN IMMEDIATE');
+      try {
+        const current = db.prepare('SELECT password_hash FROM admins WHERE id = ?').get(admin.id);
+        // A reset may have completed while the password was being verified.
+        if (!current || current.password_hash !== admin.password_hash) throw new RequestError(401, 'E-mail ou senha incorretos.');
+        db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(Date.now());
+        db.prepare('INSERT INTO sessions (token_hash, admin_id, expires_at) VALUES (?, ?, ?)').run(hashToken(token), admin.id, Date.now() + sessionTTL);
+        db.exec('COMMIT');
+      } catch (error) {
+        db.exec('ROLLBACK');
+        throw error;
+      }
       return json(res, 200, { admin: { email: admin.email } }, { 'Set-Cookie': cookie(token, sessionTTL / 1000) });
     }
     if (pathname.startsWith('/api/admin/')) {

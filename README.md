@@ -43,7 +43,21 @@ npm run admin:create
 
 O terminal solicita o e-mail, uma senha de 12 a 256 caracteres e sua confirmação. A digitação da senha fica oculta. Depois, entre pela área administrativa do site. Execute novamente com outro e-mail para cadastrar outro administrador; o comando não sobrescreve contas existentes.
 
-Para automação, o comando aceita as variáveis locais `ADMIN_EMAIL` e `ADMIN_PASSWORD` ou a opção `--stdin-json`. Forneça credenciais por um mecanismo seguro, sem colocá-las no histórico do terminal, no repositório ou nos scripts de instalação. Essas variáveis são usadas somente no cadastro, não são necessárias para iniciar a aplicação e não são preenchidas pelo projeto.
+Para automação, o comando aceita as variáveis locais `ADMIN_EMAIL` e `ADMIN_PASSWORD` ou a opção `--stdin-json`. Forneça credenciais por um mecanismo seguro, sem colocá-las no histórico do terminal, no repositório ou nos scripts de instalação. Essas variáveis são usadas pelos comandos de cadastro e redefinição, não são necessárias para iniciar a aplicação e não são preenchidas pelo projeto.
+
+## Redefinir a senha de um administrador
+
+No terminal, dentro da pasta que contém `package.json`, execute:
+
+```sh
+npm run admin:reset-password
+```
+
+No PowerShell do Windows, use `npm.cmd run admin:reset-password`. Informe o e-mail da conta existente, a nova senha (12 a 256 caracteres) e a confirmação. A senha fica oculta durante a digitação. O comando mantém o e-mail, os chamados e as outras contas; encerra todas as sessões desse administrador. A conta deverá entrar novamente com a nova senha. Um e-mail sem conta cadastrada gera um erro e não cria um administrador.
+
+Use o mesmo `DATA_DIR` do servidor. A redefinição exige acesso ao terminal da máquina que guarda o banco; não há recuperação por e-mail na tela de login. Para automação, o comando também aceita `--stdin-json` ou as variáveis locais `ADMIN_EMAIL` e `ADMIN_PASSWORD`, com os mesmos cuidados do cadastro.
+
+Se baixou uma versão anterior do projeto, baixe o ZIP atualizado e copie os arquivos para a pasta atual, substituindo os arquivos de código quando solicitado. **Preserve a pasta `.data` e o arquivo `.env`**, se existirem: eles guardam seus dados e sua configuração. Pare o site antes da atualização e inicie novamente depois. Não execute o comando em uma pasta nova sem o seu banco, pois sua conta pertence ao banco original.
 
 ## Build e validação
 
